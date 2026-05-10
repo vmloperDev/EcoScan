@@ -16,11 +16,11 @@ const categories = {
   },
   plastic: {
     code: "PL",
-    item: "Plastic/Cardboard",
-    label: "Plastic/Cardboard",
+    item: "Plastic Bottle",
+    label: "Plastic",
     impact: 0.02,
     color: "#3a7bd5",
-    instruction: "Empty or wipe the item first. Flatten bottles or cardboard if possible, then place it in the recycling bin."
+    instruction: "Empty or wipe the plastic item first. Flatten bottles if possible, then place it in the recycling bin."
   },
   biodegradable: {
     code: "FW",
@@ -32,11 +32,11 @@ const categories = {
   },
   paper: {
     code: "PC",
-    item: "Paper",
-    label: "Paper Waste",
+    item: "Paper/Cardboard",
+    label: "Paper/Cardboard",
     impact: 0.01,
     color: "#f59e0b",
-    instruction: "If clean and dry, sort it as paper. If dirty, place it in residual waste."
+    instruction: "If clean and dry, sort it as paper or cardboard. If wet, greasy, or dirty, place it in residual waste."
   },
   glass: {
     code: "GL",

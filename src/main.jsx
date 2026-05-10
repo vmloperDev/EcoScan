@@ -17,40 +17,41 @@ import "./styles.css";
 
 const defaultHistory = [
   { code: "AL", item: "Aluminium Can", time: "Today • 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable" },
-  { code: "PL", item: "Plastic/Cardboard", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic/Cardboard" }
+  { code: "PL", item: "Plastic Bottle", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic" }
 ];
 
 const disposalGuide = {
   plastic: {
     code: "PL",
-    title: "Plastic/Cardboard",
+    title: "Plastic",
     tips: [
       "Empty bottles or containers before recycling.",
       "Flatten plastic bottles to save bin space.",
-      "Keep cardboard dry so it can still be recycled.",
       "Remove food residue from plastic containers.",
       "Separate plastic lids if your local bins require it.",
-      "Do not recycle greasy cardboard from food packaging.",
       "Rinse detergent or shampoo bottles before disposal.",
-      "Break down cardboard boxes before placing them in the bin.",
       "Check for recycling symbols when plastic type is unclear.",
-      "If plastic is dirty and cannot be cleaned, place it in residual waste."
+      "If plastic is dirty and cannot be cleaned, place it in residual waste.",
+      "Do not mix plastic with food scraps or liquids.",
+      "Crush bottles only if your recycling program allows it.",
+      "Keep plastic wrappers out if your local facility does not accept soft plastics.",
+      "Remove straws or small accessories before recycling plastic cups."
     ]
   },
   paper: {
     code: "PC",
-    title: "Paper",
+    title: "Paper/Cardboard",
     tips: [
       "Recycle paper only when it is clean and dry.",
       "Remove plastic tape or stickers when possible.",
       "Do not mix wet paper with clean recyclables.",
       "Fold paper to save space in the recycling bin.",
       "Keep paper away from food waste and liquids.",
-      "Receipts may not be accepted in all paper recycling programs.",
-      "Shredded paper should be bagged if your local rules require it.",
       "Paper with heavy grease should go to residual waste.",
-      "Reuse one-sided paper before recycling it.",
-      "Separate paper from plastic packaging before disposal."
+      "Separate paper from plastic packaging before disposal.",
+      "Flatten cardboard boxes before placing them in the recycling bin.",
+      "Keep cardboard dry so it can still be recycled.",
+      "Do not recycle greasy cardboard from food packaging."
     ]
   },
   biodegradable: {
