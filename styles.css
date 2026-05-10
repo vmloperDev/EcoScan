@@ -1507,6 +1507,23 @@ button {
   background: white;
 }
 
+.install-app-button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba(0, 210, 255, 0.25);
+  border-radius: 14px;
+  background: rgba(0, 210, 255, 0.12);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.install-app-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .logout-button {
   width: fit-content;
   padding: 16px;
@@ -1686,6 +1703,12 @@ body.light-mode .logout-button {
 
 body.light-mode .mode-toggle span {
   background: white;
+}
+
+body.light-mode .install-app-button {
+  border-color: rgba(0, 160, 210, 0.28);
+  background: rgba(0, 210, 255, 0.1);
+  color: #0369a1;
 }
 
 body.light-mode .scanner-card,

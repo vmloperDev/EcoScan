@@ -1,9 +1,11 @@
-const CACHE_NAME = "ecoscan-progressive-v2";
+const CACHE_NAME = "ecoscan-progressive-v3";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
   "/assets/ecoscan-icon.svg",
+  "/assets/ecoscan-icon-192.png",
+  "/assets/ecoscan-icon-512.png",
   "/model/model.json",
   "/model/metadata.json",
   "/model/weights.bin"
@@ -31,6 +33,13 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+
+  if (!isSameOrigin) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   const isDevAsset =
     url.pathname.startsWith("/src/") ||
     url.pathname.startsWith("/@vite/") ||
@@ -55,11 +64,15 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      });
+      const networkFetch = fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached);
 
       return cached || networkFetch;
     })

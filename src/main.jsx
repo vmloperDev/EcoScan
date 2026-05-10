@@ -178,6 +178,8 @@ function App() {
     instruction: "Turn on the camera or upload an image to classify waste locally."
   });
   const [pwaStatus, setPwaStatus] = useState("Offline shell loading");
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalledApp, setIsInstalledApp] = useState(window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone === true);
   const [networkStatus, setNetworkStatus] = useState(navigator.onLine ? "Edge AI Online" : "Offline Mode Active");
 
   const clearScanResult = () => {
@@ -226,6 +228,27 @@ function App() {
       setUser(firebaseUser);
       setAuthLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    const beforeInstall = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+      setPwaStatus("Ready to install");
+    };
+
+    const installed = () => {
+      setInstallPrompt(null);
+      setIsInstalledApp(true);
+      setPwaStatus("Installed app ready");
+    };
+
+    window.addEventListener("beforeinstallprompt", beforeInstall);
+    window.addEventListener("appinstalled", installed);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", beforeInstall);
+      window.removeEventListener("appinstalled", installed);
+    };
   }, []);
 
   useEffect(() => {
@@ -358,6 +381,23 @@ function App() {
     setAuthView("login");
   };
 
+  const installApp = async () => {
+    if (isInstalledApp) {
+      setPwaStatus("Installed app ready");
+      return;
+    }
+
+    if (!installPrompt) {
+      setPwaStatus("Use browser menu to add EcoScan to your home screen");
+      return;
+    }
+
+    installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    setInstallPrompt(null);
+    setPwaStatus(choice.outcome === "accepted" ? "Installing EcoScan" : "Install dismissed");
+  };
+
   if (authLoading) {
     return <LoadingScreen />;
   }
@@ -380,6 +420,9 @@ function App() {
       setActiveView={setActiveView}
       networkStatus={networkStatus}
       pwaStatus={pwaStatus}
+      installApp={installApp}
+      canInstallApp={Boolean(installPrompt) && !isInstalledApp}
+      isInstalledApp={isInstalledApp}
       stats={stats}
       historyItems={historyItems}
       deleteHistoryItem={deleteHistoryItem}
@@ -981,7 +1024,7 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
   );
 }
 
-function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory, profileAvatar, updateProfileAvatar }) {
+function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory, profileAvatar, updateProfileAvatar, installApp, canInstallApp, isInstalledApp, pwaStatus }) {
   const [name, setName] = useState(user.displayName || "Floyd Allen B. Bueno");
   const [settingsMessage, setSettingsMessage] = useState("");
   const avatarInputRef = useRef(null);
@@ -1107,6 +1150,15 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems
           <div><p>Dark Mode</p><span>System preference</span></div>
           <button onClick={() => setIsDark(!isDark)} id="mode-toggle" className="mode-toggle" type="button" aria-label="Toggle dark mode">
             <span style={isDark ? { right: 4, left: "auto" } : { left: 4, right: "auto" }} />
+          </button>
+        </div>
+        <div className="setting-row glass-panel">
+          <div>
+            <p>Install EcoScan</p>
+            <span>{isInstalledApp ? "EcoScan is running as an installed app." : pwaStatus}</span>
+          </div>
+          <button onClick={installApp} className="install-app-button" type="button" disabled={isInstalledApp}>
+            {isInstalledApp ? "Installed" : canInstallApp ? "Install" : "How To Install"}
           </button>
         </div>
         <div className="setting-tools glass-panel">

@@ -2,12 +2,28 @@
   "name": "EcoScan",
   "short_name": "EcoScan",
   "description": "Offline-first edge waste classification and sustainability insights.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#050505",
   "theme_color": "#050505",
+  "orientation": "portrait-primary",
+  "categories": ["education", "utilities", "productivity"],
   "icons": [
+    {
+      "src": "/assets/ecoscan-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/ecoscan-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/assets/ecoscan-icon.svg",
       "sizes": "any",
