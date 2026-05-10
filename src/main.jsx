@@ -792,6 +792,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
         )}
         </div>
         <RealTimeMetrics stats={stats} scanResult={scanResult} hasIdentification={hasIdentification} />
+        <CarbonTracking stats={stats} />
       </div>
       <div className="dashboard-column">
         <section className="impact-panel glass-panel">
@@ -818,17 +819,6 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             ))}
           </div>
           <div className="energy-note"><p>Local Edge AI avoided about <strong>{stats.energy}</strong> of cloud processing energy.</p></div>
-        </section>
-        <section className="carbon-panel glass-panel">
-          <p>Carbon Tracking</p>
-          <div className="carbon-meter">
-            <div><span style={{ width: `${stats.carbonProgress}%` }} /></div>
-            <strong>{stats.co2} / {stats.carbonGoal.toFixed(1)} kg CO2 goal</strong>
-          </div>
-          <div className="carbon-grid">
-            <div><span>Per Scan</span><strong>{stats.carbonPerScan} kg</strong></div>
-            <div><span>Items Tracked</span><strong>{stats.landfillAvoided}</strong></div>
-          </div>
         </section>
         <section className="guide-panel glass-panel">
           <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
@@ -858,6 +848,22 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             </div>
           )}
         </section>
+      </div>
+    </section>
+  );
+}
+
+function CarbonTracking({ stats }) {
+  return (
+    <section className="carbon-panel glass-panel">
+      <p>Carbon Tracking</p>
+      <div className="carbon-meter">
+        <div><span style={{ width: `${stats.carbonProgress}%` }} /></div>
+        <strong>{stats.co2} / {stats.carbonGoal.toFixed(1)} kg CO2 goal</strong>
+      </div>
+      <div className="carbon-grid">
+        <div><span>Per Scan</span><strong>{stats.carbonPerScan} kg</strong></div>
+        <div><span>Items Tracked</span><strong>{stats.landfillAvoided}</strong></div>
       </div>
     </section>
   );
