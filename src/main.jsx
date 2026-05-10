@@ -133,6 +133,13 @@ const disposalGuide = {
 };
 
 const guideOrder = ["plastic", "paper", "biodegradable", "metal", "glass", "hazardous"];
+const defaultAvatar = { type: "preset", id: "cyan" };
+const profilePresets = [
+  { id: "cyan", label: "Cyan", colors: ["#00d2ff", "#3a7bd5"], mark: "E" },
+  { id: "green", label: "Green", colors: ["#22c55e", "#14b8a6"], mark: "CO" },
+  { id: "gold", label: "Gold", colors: ["#f59e0b", "#22c55e"], mark: "12" },
+  { id: "rose", label: "Rose", colors: ["#fb7185", "#3a7bd5"], mark: "AI" }
+];
 
 function pickGuideTip(key, seed = "") {
   const guide = disposalGuide[key] || disposalGuide.plastic;
@@ -161,6 +168,7 @@ function App() {
   const [authView, setAuthView] = useState("login");
   const [isDark, setIsDark] = useState(true);
   const [historyItems, setHistoryItems] = useState(defaultHistory);
+  const [profileAvatar, setProfileAvatar] = useState(defaultAvatar);
   const [scanResult, setScanResult] = useState({
     code: "--",
     item: "Awaiting Scan",
@@ -254,6 +262,9 @@ function App() {
     const key = user ? `ecoscan-prime-history-${user.uid}` : "ecoscan-prime-history-demo";
     const saved = JSON.parse(localStorage.getItem(key) || "null");
     setHistoryItems(saved || (user ? [] : defaultHistory));
+
+    const savedAvatar = JSON.parse(localStorage.getItem(profileAvatarKey(user)) || "null");
+    setProfileAvatar(savedAvatar || defaultAvatar);
   }, [user]);
 
   useEffect(() => {
@@ -329,6 +340,11 @@ function App() {
     setHistoryItems([]);
   };
 
+  const updateProfileAvatar = (avatar) => {
+    setProfileAvatar(avatar);
+    localStorage.setItem(profileAvatarKey(user), JSON.stringify(avatar));
+  };
+
   const rescanItem = () => {
     clearScanResult();
   };
@@ -370,6 +386,8 @@ function App() {
       clearHistory={clearHistory}
       scanResult={scanResult}
       setScanResult={setScanResult}
+      profileAvatar={profileAvatar}
+      updateProfileAvatar={updateProfileAvatar}
       confirmScan={confirmScan}
       rescanItem={rescanItem}
       isDark={isDark}
@@ -578,7 +596,7 @@ function PrimeApp(props) {
   return (
     <div className="prime-app">
       <aside className="sidebar glass-panel">
-        <div className="logo-block neon-glow" />
+        <ProfileAvatar avatar={props.profileAvatar} name={displayName} className="sidebar-avatar neon-glow" />
         <h1>Hi, {capitalize(firstName)}.</h1>
         <p className="profile-meta">Gordon College • BSCS-2C</p>
         <nav className="nav-list" aria-label="EcoScan sections">
@@ -606,6 +624,33 @@ function PrimeApp(props) {
         )}
         {props.activeView === "settings" && <SettingsView {...props} />}
       </main>
+    </div>
+  );
+}
+
+function ProfileAvatar({ avatar, name, className = "" }) {
+  const preset = profilePresets.find((item) => item.id === avatar?.id) || profilePresets[0];
+  const initials = getInitials(name);
+
+  if (avatar?.type === "upload" && avatar.src) {
+    return (
+      <div className={`profile-avatar ${className}`}>
+        <img src={avatar.src} alt={`${name || "EcoScan"} profile`} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`profile-avatar preset-avatar ${className}`}
+      style={{
+        "--avatar-start": preset.colors[0],
+        "--avatar-end": preset.colors[1]
+      }}
+      aria-label={`${preset.label} profile avatar`}
+      role="img"
+    >
+      <span>{preset.mark || initials}</span>
     </div>
   );
 }
@@ -936,9 +981,10 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
   );
 }
 
-function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory }) {
+function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory, profileAvatar, updateProfileAvatar }) {
   const [name, setName] = useState(user.displayName || "Floyd Allen B. Bueno");
   const [settingsMessage, setSettingsMessage] = useState("");
+  const avatarInputRef = useRef(null);
 
   const saveName = async () => {
     if (hasFirebaseConfig && auth?.currentUser) {
@@ -975,6 +1021,33 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems
     setSettingsMessage("Scan history cleared.");
   };
 
+  const choosePresetAvatar = (id) => {
+    updateProfileAvatar({ type: "preset", id });
+    setSettingsMessage("Profile picture updated.");
+  };
+
+  const uploadAvatar = async (event) => {
+    const [file] = event.target.files;
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setSettingsMessage("Choose an image file for your profile picture.");
+      return;
+    }
+
+    try {
+      const src = await resizeAvatarImage(file);
+      updateProfileAvatar({ type: "upload", src });
+      setSettingsMessage("Profile picture uploaded.");
+    } catch (error) {
+      setSettingsMessage("That image could not be loaded. Try another picture.");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   const removeAccount = async () => {
     if (!window.confirm("Delete this EcoScan account? This removes the account from Firebase and clears local scan history.")) {
       return;
@@ -997,6 +1070,34 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems
     <section className="settings-panel glass-panel">
       <h2>Settings</h2>
       <div className="settings-stack">
+        <div className="profile-picture-card glass-panel">
+          <ProfileAvatar avatar={profileAvatar} name={name} className="settings-avatar" />
+          <div className="profile-picture-controls">
+            <div>
+              <p>Profile Picture</p>
+              <span>Upload your own image or choose an EcoScan avatar.</span>
+            </div>
+            <div className="avatar-preset-grid">
+              {profilePresets.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => choosePresetAvatar(preset.id)}
+                  className={profileAvatar?.type === "preset" && profileAvatar.id === preset.id ? "active" : ""}
+                  type="button"
+                  aria-label={`Use ${preset.label} avatar`}
+                  style={{ "--avatar-start": preset.colors[0], "--avatar-end": preset.colors[1] }}
+                >
+                  <span>{preset.mark}</span>
+                </button>
+              ))}
+            </div>
+            <div className="profile-picture-actions">
+              <button onClick={() => avatarInputRef.current.click()} type="button">Upload Photo</button>
+              <button onClick={() => choosePresetAvatar(defaultAvatar.id)} type="button">Use Default</button>
+              <input ref={avatarInputRef} type="file" accept="image/*" onChange={uploadAvatar} />
+            </div>
+          </div>
+        </div>
         <div className="field-group">
           <label>Display Name</label>
           <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
@@ -1040,6 +1141,49 @@ function LoadingScreen() {
 
 function demoUser(email, displayName) {
   return { uid: `demo-${email}`, email, displayName };
+}
+
+function profileAvatarKey(user) {
+  return user ? `ecoscan-prime-avatar-${user.uid}` : "ecoscan-prime-avatar-demo";
+}
+
+function getInitials(name = "EcoScan User") {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase() || "EC";
+}
+
+function resizeAvatarImage(file) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const url = URL.createObjectURL(file);
+
+    image.onload = () => {
+      const size = 240;
+      const sourceSize = Math.min(image.width, image.height);
+      const sourceX = Math.floor((image.width - sourceSize) / 2);
+      const sourceY = Math.floor((image.height - sourceSize) / 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      canvas
+        .getContext("2d")
+        .drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Image load failed"));
+    };
+
+    image.src = url;
+  });
 }
 
 function codeForMaterial(material) {

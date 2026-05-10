@@ -320,12 +320,34 @@ button {
   border-radius: 40px;
 }
 
-.logo-block {
+.logo-block,
+.profile-avatar {
   width: 64px;
   height: 64px;
   margin-bottom: 24px;
   border-radius: 16px;
   background: linear-gradient(135deg, var(--cyan), var(--blue));
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: linear-gradient(135deg, var(--avatar-start, var(--cyan)), var(--avatar-end, var(--blue)));
+  color: #050505;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar span {
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: 0;
 }
 
 .sidebar h1 {
@@ -1277,6 +1299,91 @@ button {
   max-width: 560px;
 }
 
+.profile-picture-card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  padding: 24px;
+  border-radius: 24px;
+}
+
+.settings-avatar {
+  width: 96px;
+  height: 96px;
+  margin: 0;
+  border-radius: 26px;
+}
+
+.settings-avatar span {
+  font-size: 28px;
+}
+
+.profile-picture-controls {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.profile-picture-controls p {
+  margin: 0 0 4px;
+  font-weight: 950;
+}
+
+.profile-picture-controls span,
+.profile-picture-actions {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.avatar-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 42px);
+  gap: 10px;
+}
+
+.avatar-preset-grid button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--avatar-start), var(--avatar-end));
+  color: #050505;
+  font-size: 12px;
+  font-weight: 950;
+  transition: 0.2s ease;
+}
+
+.avatar-preset-grid button.active,
+.avatar-preset-grid button:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 18px rgba(0, 210, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.profile-picture-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 10px;
+}
+
+.profile-picture-actions input {
+  display: none;
+}
+
+.profile-picture-actions button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-size: 11px;
+  font-weight: 950;
+}
+
 .field-group {
   display: grid;
   gap: 16px;
@@ -1500,6 +1607,7 @@ body.light-mode .guide-item,
 body.light-mode .history-item,
 body.light-mode .setting-row,
 body.light-mode .setting-tools,
+body.light-mode .profile-picture-card,
 body.light-mode .empty-history {
   border-color: rgba(15, 23, 42, 0.1);
   background: rgba(255, 255, 255, 0.7);
@@ -1520,6 +1628,7 @@ body.light-mode .energy-note p,
 body.light-mode .empty-history span,
 body.light-mode .setting-row span,
 body.light-mode .setting-tools span,
+body.light-mode .profile-picture-controls span,
 body.light-mode .history-item small {
   color: #475569;
 }
@@ -1553,7 +1662,14 @@ body.light-mode .settings-actions button {
   color: var(--slate);
 }
 
-body.light-mode .settings-actions button:hover {
+body.light-mode .profile-picture-actions button {
+  border-color: rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--slate);
+}
+
+body.light-mode .settings-actions button:hover,
+body.light-mode .profile-picture-actions button:hover {
   background: rgba(15, 23, 42, 0.1);
 }
 
@@ -1645,6 +1761,11 @@ body.light-mode .inline-result-guide small {
   }
 
   .logo-block {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .sidebar-avatar {
     grid-row: span 2;
     margin: 0;
   }
@@ -1810,12 +1931,17 @@ body.light-mode .inline-result-guide small {
     backdrop-filter: blur(18px);
   }
 
-  .logo-block {
+  .logo-block,
+  .sidebar-avatar {
     grid-row: span 2;
     width: 48px;
     height: 48px;
     margin: 0;
     border-radius: 14px;
+  }
+
+  .sidebar-avatar span {
+    font-size: 15px;
   }
 
   .sidebar h1 {
@@ -2078,6 +2204,27 @@ body.light-mode .inline-result-guide small {
   .history-panel,
   .settings-panel {
     min-height: 560px;
+  }
+
+  .profile-picture-card {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .settings-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 24px;
+  }
+
+  .profile-picture-actions {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .profile-picture-actions button {
+    width: 100%;
   }
 
   .history-header {
