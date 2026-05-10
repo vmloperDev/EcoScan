@@ -17,7 +17,16 @@ import "./styles.css";
 
 const defaultHistory = [
   { code: "AL", item: "Aluminium Can", time: "Today • 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable" },
-  { code: "PL", item: "Plastic Bottle", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Recyclable" }
+  { code: "PL", item: "Plastic/Cardboard", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic/Cardboard" }
+];
+
+const disposalGuide = [
+  { code: "PL", title: "Plastic/Cardboard", detail: "Empty, wipe, and flatten if possible before recycling." },
+  { code: "PC", title: "Paper", detail: "Recycle only if clean and dry. Wet or dirty paper goes to residual waste." },
+  { code: "FW", title: "Organic", detail: "Place food scraps in compost or biodegradable waste bins." },
+  { code: "AL", title: "Metal", detail: "Rinse cans, remove leftover liquid, then recycle." },
+  { code: "GL", title: "Glass", detail: "Empty carefully and place in the glass recycling bin." },
+  { code: "HZ", title: "Battery", detail: "Keep out of regular bins. Bring to a hazardous waste collection point." }
 ];
 
 function App() {
@@ -647,6 +656,20 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             {!stats.totalItems && <div><span>No scans confirmed</span><strong>0</strong></div>}
           </div>
           <div className="energy-note"><p>Prevented <strong>{stats.energy}</strong> of cloud energy by running scans locally.</p></div>
+        </section>
+        <section className="guide-panel glass-panel">
+          <p>Disposal Guide</p>
+          <div className="guide-list">
+            {disposalGuide.map((guide) => (
+              <div className="guide-item" key={guide.code}>
+                <span>{guide.code}</span>
+                <div>
+                  <strong>{guide.title}</strong>
+                  <small>{guide.detail}</small>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </section>

@@ -600,6 +600,7 @@ button {
 .identified-card p,
 .impact-panel > p,
 .efficiency-panel > p,
+.guide-panel > p,
 .scanner-control-card > p {
   margin: 0 0 16px;
   color: var(--muted);
@@ -761,7 +762,8 @@ button {
 }
 
 .impact-panel,
-.efficiency-panel {
+.efficiency-panel,
+.guide-panel {
   padding: 32px;
   border-radius: 40px;
 }
@@ -886,6 +888,54 @@ button {
 
 .energy-note strong {
   color: var(--cyan);
+}
+
+.guide-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.guide-list {
+  display: grid;
+  gap: 10px;
+}
+
+.guide-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-item span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 210, 255, 0.12);
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.guide-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: white;
+  font-size: 13px;
+}
+
+.guide-item small {
+  display: block;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .hidden-view {
@@ -1218,7 +1268,8 @@ body.light-mode .scanner-blackout {
   .history-panel,
   .settings-panel,
   .impact-panel,
-  .efficiency-panel {
+  .efficiency-panel,
+  .guide-panel {
     padding: 18px;
     border-radius: 26px;
   }
@@ -1421,6 +1472,17 @@ body.light-mode .scanner-blackout {
   .energy-note {
     padding: 18px;
     border-radius: 20px;
+  }
+
+  .guide-item {
+    grid-template-columns: 38px minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .guide-item span {
+    width: 34px;
+    height: 34px;
+    font-size: 11px;
   }
 
   .history-panel,

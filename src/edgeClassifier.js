@@ -16,11 +16,11 @@ const categories = {
   },
   plastic: {
     code: "PL",
-    item: "Plastic Bottle",
-    label: "Recyclable",
+    item: "Plastic/Cardboard",
+    label: "Plastic/Cardboard",
     impact: 0.02,
     color: "#3a7bd5",
-    instruction: "Empty the bottle, flatten if possible, then place it in the recycling bin."
+    instruction: "Empty or wipe the item first. Flatten bottles or cardboard if possible, then place it in the recycling bin."
   },
   biodegradable: {
     code: "FW",
