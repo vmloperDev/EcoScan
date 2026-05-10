@@ -456,7 +456,8 @@ button {
 
 .scanner-card.result-mode {
   display: grid;
-  place-items: center;
+  align-items: center;
+  justify-items: center;
   height: min(620px, calc(100vh - 48px));
   min-height: 520px;
   padding: 32px;
@@ -912,7 +913,8 @@ button {
   gap: 18px;
 }
 
-.dashboard-view:has(.result-mode) .guide-panel {
+.dashboard-view:has(.result-mode) .guide-panel,
+.guide-panel {
   order: -1;
 }
 
@@ -1158,14 +1160,61 @@ button {
   border-radius: 24px;
 }
 
+.setting-tools {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 24px;
+}
+
 .setting-row p {
   margin: 0 0 4px;
   font-weight: 900;
 }
 
-.setting-row span {
+.setting-row span,
+.setting-tools span {
   color: var(--muted);
   font-size: 12px;
+}
+
+.setting-tools p {
+  margin: 0 0 4px;
+  font-weight: 900;
+}
+
+.settings-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.settings-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.settings-actions .danger-action {
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+.settings-message {
+  margin: -18px 0 0;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .mode-toggle {
@@ -1562,6 +1611,10 @@ body.light-mode .scanner-blackout {
   .setting-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .settings-actions {
+    grid-template-columns: 1fr;
   }
 
   .history-left {

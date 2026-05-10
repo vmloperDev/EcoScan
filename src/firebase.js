@@ -3,6 +3,7 @@ import {
   GoogleAuthProvider,
   browserLocalPersistence,
   createUserWithEmailAndPassword,
+  deleteUser,
   getAuth,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -38,6 +39,7 @@ if (auth) {
 export {
   auth,
   createUserWithEmailAndPassword,
+  deleteUser,
   googleProvider,
   hasFirebaseConfig,
   onAuthStateChanged,

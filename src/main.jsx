@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import {
   auth,
   createUserWithEmailAndPassword,
+  deleteUser,
   googleProvider,
   hasFirebaseConfig,
   onAuthStateChanged,
@@ -843,8 +844,9 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
   );
 }
 
-function SettingsView({ user, isDark, setIsDark, setUser, onLogout }) {
+function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory }) {
   const [name, setName] = useState(user.displayName || "Floyd Allen B. Bueno");
+  const [settingsMessage, setSettingsMessage] = useState("");
 
   const saveName = async () => {
     if (hasFirebaseConfig && auth?.currentUser) {
@@ -852,6 +854,50 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout }) {
       setUser({ ...auth.currentUser });
     } else {
       setUser({ ...user, displayName: name });
+    }
+    setSettingsMessage("Profile name updated.");
+  };
+
+  const downloadHistory = () => {
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      user: user.email,
+      scans: historyItems
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ecoscan-history.json";
+    link.click();
+    URL.revokeObjectURL(url);
+    setSettingsMessage("Scan history exported.");
+  };
+
+  const clearSavedHistory = () => {
+    if (!window.confirm("Clear all saved scan history for this account?")) {
+      return;
+    }
+
+    clearHistory();
+    setSettingsMessage("Scan history cleared.");
+  };
+
+  const removeAccount = async () => {
+    if (!window.confirm("Delete this EcoScan account? This removes the account from Firebase and clears local scan history.")) {
+      return;
+    }
+
+    try {
+      clearHistory();
+      if (hasFirebaseConfig && auth?.currentUser) {
+        await deleteUser(auth.currentUser);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      const recentLogin = error.code === "auth/requires-recent-login";
+      setSettingsMessage(recentLogin ? "Please log out, log in again, then delete the account." : authError(error));
     }
   };
 
@@ -870,6 +916,18 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout }) {
             <span style={isDark ? { right: 4, left: "auto" } : { left: 4, right: "auto" }} />
           </button>
         </div>
+        <div className="setting-tools glass-panel">
+          <div>
+            <p>Account Tools</p>
+            <span>Manage your saved EcoScan data.</span>
+          </div>
+          <div className="settings-actions">
+            <button onClick={downloadHistory} type="button" disabled={!historyItems.length}>Download History</button>
+            <button onClick={clearSavedHistory} type="button" disabled={!historyItems.length}>Clear History</button>
+            <button onClick={removeAccount} className="danger-action" type="button">Delete Account</button>
+          </div>
+        </div>
+        {settingsMessage && <p className="settings-message">{settingsMessage}</p>}
         <button onClick={onLogout} className="logout-button" type="button">LOG OUT</button>
       </div>
     </section>
