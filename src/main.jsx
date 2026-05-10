@@ -792,7 +792,6 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
         )}
         </div>
         <RealTimeMetrics stats={stats} scanResult={scanResult} hasIdentification={hasIdentification} />
-        <CarbonTracking stats={stats} />
         <EfficiencyAnalytics stats={stats} />
       </div>
       <div className="dashboard-column">
@@ -806,6 +805,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             <div><p>TOP CATEGORY</p><strong>{stats.topCategory}</strong></div>
           </div>
         </section>
+        <CarbonTracking stats={stats} />
         <section className="guide-panel glass-panel">
           <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
           {hasIdentification && (
