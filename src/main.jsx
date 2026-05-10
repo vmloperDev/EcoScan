@@ -166,8 +166,22 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
-    if (import.meta.env.DEV && new URLSearchParams(window.location.search).has("demo")) {
+    const params = new URLSearchParams(window.location.search);
+    if (import.meta.env.DEV && params.has("demo")) {
       setUser(demoUser("demo@ecoscan.local", "Floyd Allen B. Bueno"));
+      if (params.has("result")) {
+        setScanResult({
+          code: "PC",
+          item: "Paper/Cardboard",
+          label: "Paper/Cardboard",
+          impact: 0.01,
+          confidence: 93,
+          categoryKey: "paper",
+          engine: "Demo preview",
+          createdAt: new Date().toISOString(),
+          instruction: "If clean and dry, sort it as paper or cardboard. If wet, greasy, or dirty, place it in residual waste."
+        });
+      }
       setAuthLoading(false);
       return undefined;
     }
@@ -773,20 +787,22 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
               </div>
             </div>
           )}
-          <div className="guide-list">
-            {guideOrder.map((key) => {
-              const guide = disposalGuide[key];
-              return (
-                <div className="guide-item" key={key}>
-                  <span>{guide.code}</span>
-                  <div>
-                    <strong>{guide.title}</strong>
-                    <small>{pickGuideTip(key, scanResult.createdAt || key)}</small>
+          {!hasIdentification && (
+            <div className="guide-list">
+              {guideOrder.map((key) => {
+                const guide = disposalGuide[key];
+                return (
+                  <div className="guide-item" key={key}>
+                    <span>{guide.code}</span>
+                    <div>
+                      <strong>{guide.title}</strong>
+                      <small>{pickGuideTip(key, scanResult.createdAt || key)}</small>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
     </section>

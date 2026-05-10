@@ -457,7 +457,9 @@ button {
 .scanner-card.result-mode {
   display: grid;
   place-items: center;
-  padding: 40px;
+  height: min(620px, calc(100vh - 48px));
+  min-height: 520px;
+  padding: 32px;
   background:
     radial-gradient(circle at 50% 18%, rgba(0, 210, 255, 0.16), transparent 36%),
     radial-gradient(circle at 50% 82%, rgba(34, 197, 94, 0.1), transparent 34%),
@@ -606,8 +608,8 @@ button {
   right: auto;
   bottom: auto;
   left: auto;
-  width: min(100%, 620px);
-  padding: 44px;
+  width: min(100%, 430px);
+  padding: 28px;
   border-color: rgba(0, 210, 255, 0.22);
   box-shadow: 0 0 44px rgba(0, 210, 255, 0.12);
 }
@@ -633,9 +635,9 @@ button {
 }
 
 .identified-card h2 {
-  margin: 0 0 24px;
+  margin: 0 0 18px;
   color: white;
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size: clamp(2rem, 3.2vw, 3rem);
   line-height: 0.95;
   text-align: center;
 }
@@ -748,7 +750,7 @@ button {
 }
 
 .confirm-row button {
-  min-height: 56px;
+  min-height: 52px;
   border: 0;
   border-radius: 16px;
   font-weight: 950;
@@ -908,6 +910,15 @@ button {
 .guide-panel {
   display: grid;
   gap: 18px;
+}
+
+.dashboard-view:has(.result-mode) .guide-panel {
+  order: -1;
+}
+
+.guide-panel:has(.guide-feature) {
+  gap: 12px;
+  padding-block: 24px;
 }
 
 .guide-list {
