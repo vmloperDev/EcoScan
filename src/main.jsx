@@ -769,7 +769,11 @@ function authError(error) {
     "auth/invalid-email": "Enter a valid email address.",
     "auth/invalid-credential": "Email or password is incorrect.",
     "auth/missing-email": "Enter your registered email address first.",
+    "auth/operation-not-allowed": "This sign-in method is not enabled in Firebase Authentication.",
+    "auth/popup-blocked": "The browser blocked the Google popup. Allow popups for this site and try again.",
     "auth/popup-closed-by-user": "Google login was closed before it finished.",
+    "auth/unauthorized-continue-uri": "This deployed domain is not authorized in Firebase Authentication settings.",
+    "auth/unauthorized-domain": "This deployed domain is not authorized in Firebase Authentication settings.",
     "auth/user-not-found": "No EcoScan account exists for that email.",
     "auth/weak-password": "Use at least 6 characters for the password."
   };
