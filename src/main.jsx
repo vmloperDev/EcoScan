@@ -880,7 +880,7 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
               <div className="history-code">{entry.code}</div>
               <div>
                 <p>{entry.item}</p>
-                <small>{entry.time} • {entry.label || "Unlabeled"} • {entry.confidence || 86}%</small>
+                <small>{entry.time} - {entry.label || "Unlabeled"} - {entry.confidence || 86}%</small>
               </div>
             </div>
             <div className="history-actions">
