@@ -17,9 +17,20 @@ import { classifyWasteFromCanvas } from "./edgeClassifier";
 import "./styles.css";
 
 const defaultHistory = [
-  { code: "AL", item: "Aluminium Can", time: "Today • 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable" },
-  { code: "PL", item: "Plastic Bottle", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic" }
+  { code: "AL", item: "Aluminium Can", time: "Today • 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable", categoryKey: "metal" },
+  { code: "PL", item: "Plastic Bottle", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic", categoryKey: "plastic" }
 ];
+
+const categoryDisplay = {
+  plastic: "Plastic",
+  paper: "Paper/Cardboard",
+  biodegradable: "Organic",
+  metal: "Metal",
+  glass: "Glass",
+  hazardous: "Battery"
+};
+
+const recycleKeys = new Set(["plastic", "paper", "metal", "glass"]);
 
 const disposalGuide = {
   plastic: {
@@ -130,6 +141,17 @@ function pickGuideTip(key, seed = "") {
     0
   );
   return guide.tips[hash % guide.tips.length];
+}
+
+function categoryFromEntry(entry = {}) {
+  const text = `${entry.categoryKey || ""} ${entry.item || ""} ${entry.label || ""}`.toLowerCase();
+  if (text.includes("paper") || text.includes("cardboard")) return "paper";
+  if (text.includes("plastic")) return "plastic";
+  if (text.includes("organic") || text.includes("food") || text.includes("biodegradable")) return "biodegradable";
+  if (text.includes("glass")) return "glass";
+  if (text.includes("battery") || text.includes("hazard")) return "hazardous";
+  if (text.includes("metal") || text.includes("aluminium") || text.includes("aluminum") || text.includes("can")) return "metal";
+  return "plastic";
 }
 
 function App() {
@@ -246,20 +268,35 @@ function App() {
       ? Math.round(historyItems.reduce((sum, item) => sum + (item.confidence || 86), 0) / totalScans)
       : 0;
     const categoryCounts = historyItems.reduce((counts, item) => {
-      const label = item.label || "Unlabeled";
-      counts[label] = (counts[label] || 0) + 1;
+      const key = item.categoryKey || categoryFromEntry(item);
+      counts[key] = (counts[key] || 0) + 1;
       return counts;
     }, {});
-    const topCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "No scans yet";
+    const recyclableScans = historyItems.filter((item) => recycleKeys.has(item.categoryKey || categoryFromEntry(item))).length;
+    const topCategoryKey = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const chartData = guideOrder.map((key) => ({
+      key,
+      label: categoryDisplay[key],
+      count: categoryCounts[key] || 0,
+      percent: totalScans ? Math.round(((categoryCounts[key] || 0) / totalScans) * 100) : 0
+    }));
+    const carbonGoal = 5;
+    const carbonProgress = Math.min(100, Math.round((co2 / carbonGoal) * 100));
+    const cloudEnergySaved = totalScans * 0.08;
 
     return {
       co2: co2.toFixed(2),
       totalItems: totalScans,
       accuracy,
-      energy: `${(totalScans * 0.08).toFixed(2)}kWh`,
-      recycleRate: totalScans ? Math.round(((categoryCounts.Recyclable || 0) / totalScans) * 100) : 0,
-      topCategory,
-      categoryCounts
+      energy: `${cloudEnergySaved.toFixed(2)}kWh`,
+      recycleRate: totalScans ? Math.round((recyclableScans / totalScans) * 100) : 0,
+      topCategory: topCategoryKey ? categoryDisplay[topCategoryKey] : "No scans yet",
+      categoryCounts,
+      chartData,
+      carbonGoal,
+      carbonProgress,
+      landfillAvoided: totalScans,
+      carbonPerScan: totalScans ? (co2 / totalScans).toFixed(3) : "0.000"
     };
   }, [historyItems]);
 
@@ -275,7 +312,8 @@ function App() {
         time: "Just now",
         impact: scanResult.impact,
         confidence: scanResult.confidence,
-        label: scanResult.label
+        label: scanResult.label,
+        categoryKey: scanResult.categoryKey
       },
       ...items
     ].slice(0, 20));
@@ -728,6 +766,10 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
               <span>{scanResult.confidence}% confidence</span>
             </div>
             <p className="ai-instruction">{scanResult.instruction}</p>
+            <div className="inline-result-guide">
+              <span>{activeGuide.code}</span>
+              <small>{activeGuideTip}</small>
+            </div>
             <div className="confirm-row">
               <button onClick={confirmScan} type="button" disabled={isClassifying}>CONFIRM</button>
               <button onClick={resetScanner} type="button" disabled={isClassifying}>RESCAN</button>
@@ -761,21 +803,29 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
         </section>
         <section className="efficiency-panel glass-panel">
           <p>Efficiency Analytics</p>
-          <div className="mini-bars">
-            <span style={{ height: `${Math.max(12, stats.recycleRate)}%` }} />
-            <span style={{ height: `${Math.max(12, stats.accuracy)}%` }} />
-            <span style={{ height: `${Math.max(12, Math.min(100, stats.totalItems * 12))}%` }} />
-          </div>
-          <div className="analytics-breakdown">
-            {Object.entries(stats.categoryCounts).map(([label, count]) => (
-              <div key={label}>
-                <span>{label}</span>
-                <strong>{count}</strong>
+          <div className="category-chart">
+            {stats.chartData.map((item) => (
+              <div className="category-row" key={item.key}>
+                <div>
+                  <span>{item.label}</span>
+                  <strong>{item.count}</strong>
+                </div>
+                <i><b style={{ width: `${Math.max(4, item.percent)}%` }} /></i>
               </div>
             ))}
-            {!stats.totalItems && <div><span>No scans confirmed</span><strong>0</strong></div>}
           </div>
-          <div className="energy-note"><p>Prevented <strong>{stats.energy}</strong> of cloud energy by running scans locally.</p></div>
+          <div className="energy-note"><p>Local Edge AI avoided about <strong>{stats.energy}</strong> of cloud processing energy.</p></div>
+        </section>
+        <section className="carbon-panel glass-panel">
+          <p>Carbon Tracking</p>
+          <div className="carbon-meter">
+            <div><span style={{ width: `${stats.carbonProgress}%` }} /></div>
+            <strong>{stats.co2} / {stats.carbonGoal.toFixed(1)} kg CO2 goal</strong>
+          </div>
+          <div className="carbon-grid">
+            <div><span>Per Scan</span><strong>{stats.carbonPerScan} kg</strong></div>
+            <div><span>Items Tracked</span><strong>{stats.landfillAvoided}</strong></div>
+          </div>
         </section>
         <section className="guide-panel glass-panel">
           <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
