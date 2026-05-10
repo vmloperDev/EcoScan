@@ -20,14 +20,115 @@ const defaultHistory = [
   { code: "PL", item: "Plastic/Cardboard", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic/Cardboard" }
 ];
 
-const disposalGuide = [
-  { code: "PL", title: "Plastic/Cardboard", detail: "Empty, wipe, and flatten if possible before recycling." },
-  { code: "PC", title: "Paper", detail: "Recycle only if clean and dry. Wet or dirty paper goes to residual waste." },
-  { code: "FW", title: "Organic", detail: "Place food scraps in compost or biodegradable waste bins." },
-  { code: "AL", title: "Metal", detail: "Rinse cans, remove leftover liquid, then recycle." },
-  { code: "GL", title: "Glass", detail: "Empty carefully and place in the glass recycling bin." },
-  { code: "HZ", title: "Battery", detail: "Keep out of regular bins. Bring to a hazardous waste collection point." }
-];
+const disposalGuide = {
+  plastic: {
+    code: "PL",
+    title: "Plastic/Cardboard",
+    tips: [
+      "Empty bottles or containers before recycling.",
+      "Flatten plastic bottles to save bin space.",
+      "Keep cardboard dry so it can still be recycled.",
+      "Remove food residue from plastic containers.",
+      "Separate plastic lids if your local bins require it.",
+      "Do not recycle greasy cardboard from food packaging.",
+      "Rinse detergent or shampoo bottles before disposal.",
+      "Break down cardboard boxes before placing them in the bin.",
+      "Check for recycling symbols when plastic type is unclear.",
+      "If plastic is dirty and cannot be cleaned, place it in residual waste."
+    ]
+  },
+  paper: {
+    code: "PC",
+    title: "Paper",
+    tips: [
+      "Recycle paper only when it is clean and dry.",
+      "Remove plastic tape or stickers when possible.",
+      "Do not mix wet paper with clean recyclables.",
+      "Fold paper to save space in the recycling bin.",
+      "Keep paper away from food waste and liquids.",
+      "Receipts may not be accepted in all paper recycling programs.",
+      "Shredded paper should be bagged if your local rules require it.",
+      "Paper with heavy grease should go to residual waste.",
+      "Reuse one-sided paper before recycling it.",
+      "Separate paper from plastic packaging before disposal."
+    ]
+  },
+  biodegradable: {
+    code: "FW",
+    title: "Organic",
+    tips: [
+      "Place fruit and vegetable scraps in compost or biodegradable bins.",
+      "Drain extra liquid before throwing organic waste.",
+      "Keep organic waste separate from plastics and wrappers.",
+      "Do not include batteries, glass, or metal with organic waste.",
+      "Use a covered bin to reduce odor from food scraps.",
+      "Compost leaves and plant trimmings when allowed.",
+      "Avoid mixing oily packaging with food scraps.",
+      "Separate bones or meat if your compost system does not accept them.",
+      "Use biodegradable liners only if accepted locally.",
+      "Dispose organic waste quickly to avoid pests and contamination."
+    ]
+  },
+  metal: {
+    code: "AL",
+    title: "Metal",
+    tips: [
+      "Rinse cans before placing them in recycling.",
+      "Remove leftover liquid from metal containers.",
+      "Crush cans if your recycling program allows it.",
+      "Keep sharp metal lids covered or folded inward.",
+      "Do not mix batteries with ordinary metal recycling.",
+      "Separate metal from plastic packaging when possible.",
+      "Clean foil before recycling, or discard it if greasy.",
+      "Group small metal pieces together if local rules require it.",
+      "Check if aerosol cans must be empty before disposal.",
+      "Place clean food cans in the metal recycling stream."
+    ]
+  },
+  glass: {
+    code: "GL",
+    title: "Glass",
+    tips: [
+      "Empty glass bottles before recycling.",
+      "Rinse glass containers to remove residue.",
+      "Do not place broken glass loose in public bins.",
+      "Separate glass from plastic caps and metal lids.",
+      "Handle glass carefully to avoid injury.",
+      "Do not mix ceramics with glass recycling.",
+      "Do not include mirrors unless your local program accepts them.",
+      "Sort colored glass separately if required by the facility.",
+      "Wrap broken glass safely before disposal.",
+      "Place glass only in bins marked for glass recycling."
+    ]
+  },
+  hazardous: {
+    code: "HZ",
+    title: "Battery",
+    tips: [
+      "Never throw batteries in ordinary trash bins.",
+      "Bring batteries to a hazardous waste collection point.",
+      "Tape battery terminals if storing them before disposal.",
+      "Keep batteries away from heat and direct sunlight.",
+      "Do not mix leaking batteries with regular waste.",
+      "Store used batteries in a dry container.",
+      "Ask your campus waste office where battery drop boxes are located.",
+      "Do not crush, puncture, or open batteries.",
+      "Separate batteries from metal recyclables.",
+      "Dispose swollen or damaged batteries through proper safety channels."
+    ]
+  }
+};
+
+const guideOrder = ["plastic", "paper", "biodegradable", "metal", "glass", "hazardous"];
+
+function pickGuideTip(key, seed = "") {
+  const guide = disposalGuide[key] || disposalGuide.plastic;
+  const hash = Array.from(`${seed}-${key}-${new Date().toDateString()}`).reduce(
+    (total, character) => total + character.charCodeAt(0),
+    0
+  );
+  return guide.tips[hash % guide.tips.length];
+}
 
 function App() {
   const [user, setUser] = useState(null);
@@ -465,6 +566,9 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
   const [isClassifying, setIsClassifying] = useState(false);
   const [scannerMessage, setScannerMessage] = useState("On-device model standby");
   const hasIdentification = scanResult.confidence > 0;
+  const activeGuideKey = scanResult.categoryKey || "plastic";
+  const activeGuide = disposalGuide[activeGuideKey] || disposalGuide.plastic;
+  const activeGuideTip = pickGuideTip(activeGuideKey, scanResult.createdAt || scanResult.item);
 
   useEffect(() => {
     return () => stopCamera(streamRef);
@@ -658,17 +762,29 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
           <div className="energy-note"><p>Prevented <strong>{stats.energy}</strong> of cloud energy by running scans locally.</p></div>
         </section>
         <section className="guide-panel glass-panel">
-          <p>Disposal Guide</p>
-          <div className="guide-list">
-            {disposalGuide.map((guide) => (
-              <div className="guide-item" key={guide.code}>
-                <span>{guide.code}</span>
-                <div>
-                  <strong>{guide.title}</strong>
-                  <small>{guide.detail}</small>
-                </div>
+          <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
+          {hasIdentification && (
+            <div className="guide-feature">
+              <span>{activeGuide.code}</span>
+              <div>
+                <strong>{activeGuide.title}</strong>
+                <small>{activeGuideTip}</small>
               </div>
-            ))}
+            </div>
+          )}
+          <div className="guide-list">
+            {guideOrder.map((key) => {
+              const guide = disposalGuide[key];
+              return (
+                <div className="guide-item" key={key}>
+                  <span>{guide.code}</span>
+                  <div>
+                    <strong>{guide.title}</strong>
+                    <small>{pickGuideTip(key, scanResult.createdAt || key)}</small>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>

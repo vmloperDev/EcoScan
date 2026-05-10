@@ -900,6 +900,7 @@ button {
   gap: 10px;
 }
 
+.guide-feature,
 .guide-item {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
@@ -911,6 +912,12 @@ button {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.guide-feature {
+  border-color: rgba(0, 210, 255, 0.25);
+  background: rgba(0, 210, 255, 0.08);
+}
+
+.guide-feature span,
 .guide-item span {
   display: grid;
   place-items: center;
@@ -923,6 +930,7 @@ button {
   font-weight: 950;
 }
 
+.guide-feature strong,
 .guide-item strong {
   display: block;
   margin-bottom: 4px;
@@ -930,6 +938,7 @@ button {
   font-size: 13px;
 }
 
+.guide-feature small,
 .guide-item small {
   display: block;
   color: #9ca3af;
@@ -1474,11 +1483,13 @@ body.light-mode .scanner-blackout {
     border-radius: 20px;
   }
 
+  .guide-feature,
   .guide-item {
     grid-template-columns: 38px minmax(0, 1fr);
     padding: 12px;
   }
 
+  .guide-feature span,
   .guide-item span {
     width: 34px;
     height: 34px;

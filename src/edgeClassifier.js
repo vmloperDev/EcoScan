@@ -59,6 +59,7 @@ const categories = {
 const labelAliases = {
   aluminium: "metal",
   aluminum: "metal",
+  cardboard: "plastic",
   battery: "hazardous",
   batteries: "hazardous",
   food: "biodegradable",
@@ -148,10 +149,13 @@ async function runPrediction(model, labels, imageSize, canvas) {
 function buildResult(key, confidence, sourceName, engine, predictions = []) {
   const category = categories[key] || categories.metal;
   const topPredictions = predictions
-    .map((prediction) => ({
-      label: prediction.className,
-      confidence: Math.round(prediction.probability * 100)
-    }))
+    .map((prediction) => {
+      const predictionKey = normalizeLabel(prediction.className);
+      return {
+        label: categories[predictionKey]?.item || prediction.className,
+        confidence: Math.round(prediction.probability * 100)
+      };
+    })
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 3);
 
