@@ -17,8 +17,8 @@ import { classifyWasteFromCanvas } from "./edgeClassifier";
 import "./styles.css";
 
 const defaultHistory = [
-  { code: "AL", item: "Aluminium Can", time: "Today • 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable", categoryKey: "metal" },
-  { code: "PL", item: "Plastic Bottle", time: "Yesterday • 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic", categoryKey: "plastic" }
+  { code: "AL", item: "Aluminium Can", time: "Today - 10:45 AM", impact: 0.05, confidence: 94, label: "Recyclable", categoryKey: "metal" },
+  { code: "PL", item: "Plastic Bottle", time: "Yesterday - 2:15 PM", impact: 0.02, confidence: 91, label: "Plastic", categoryKey: "plastic" }
 ];
 
 const categoryDisplay = {
@@ -741,7 +741,8 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
 
   return (
     <section className="dashboard-view">
-      <div className={hasIdentification ? "scanner-card result-mode glass-panel" : "scanner-card glass-panel"}>
+      <div className="scanner-stack">
+        <div className={hasIdentification ? "scanner-card result-mode glass-panel" : "scanner-card glass-panel"}>
         {!hasIdentification && (
           <div className="scanner-blackout">
             <video ref={videoRef} className={cameraActive ? "scanner-video active" : "scanner-video"} autoPlay playsInline muted />
@@ -789,6 +790,8 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             </div>
           </div>
         )}
+        </div>
+        <RealTimeMetrics stats={stats} scanResult={scanResult} hasIdentification={hasIdentification} />
       </div>
       <div className="dashboard-column">
         <section className="impact-panel glass-panel">
@@ -855,6 +858,33 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             </div>
           )}
         </section>
+      </div>
+    </section>
+  );
+}
+
+function RealTimeMetrics({ stats, scanResult, hasIdentification }) {
+  const currentConfidence = hasIdentification ? scanResult.confidence : 0;
+  const confidenceLabel = hasIdentification ? `${currentConfidence}%` : "Standby";
+
+  return (
+    <section className="realtime-metrics-panel glass-panel" aria-label="Real-time dashboard metrics">
+      <div className="metric-card">
+        <p>Total Items Scanned</p>
+        <strong>{stats.totalItems}</strong>
+        <span>Successful classifications</span>
+      </div>
+      <div className="metric-card">
+        <p>Environmental Impact</p>
+        <strong>{stats.co2}<small> kg CO2</small></strong>
+        <span>Saved from confirmed scans</span>
+      </div>
+      <div className="metric-card confidence-card">
+        <p>Accuracy Gauge</p>
+        <div className="confidence-gauge" style={{ "--confidence": `${currentConfidence}%` }}>
+          <strong>{confidenceLabel}</strong>
+        </div>
+        <span>{hasIdentification ? "Current AI prediction" : "Waiting for scan"}</span>
       </div>
     </section>
   );

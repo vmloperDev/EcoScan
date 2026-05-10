@@ -443,10 +443,17 @@ button {
   height: 100%;
 }
 
+.scanner-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
 .scanner-card {
   position: relative;
-  height: min(820px, calc(100vh - 48px));
-  min-height: 720px;
+  height: min(650px, calc(100vh - 230px));
+  min-height: 560px;
   overflow: hidden;
   border-radius: 48px;
   background:
@@ -458,8 +465,8 @@ button {
   display: grid;
   align-items: center;
   justify-items: center;
-  height: min(620px, calc(100vh - 48px));
-  min-height: 520px;
+  height: min(520px, calc(100vh - 300px));
+  min-height: 430px;
   padding: 32px;
   background:
     radial-gradient(circle at 50% 18%, rgba(0, 210, 255, 0.16), transparent 36%),
@@ -803,6 +810,77 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+.realtime-metrics-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border-radius: 28px;
+}
+
+.metric-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metric-card p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.metric-card strong {
+  display: block;
+  color: white;
+  font-size: clamp(24px, 3.2vw, 38px);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.metric-card strong small {
+  color: var(--cyan);
+  font-size: 13px;
+}
+
+.metric-card span {
+  display: block;
+  margin-top: 9px;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.confidence-card {
+  display: grid;
+  justify-items: start;
+}
+
+.confidence-gauge {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, #050505 0 55%, transparent 56%),
+    conic-gradient(var(--cyan) var(--confidence), rgba(255, 255, 255, 0.12) 0);
+  box-shadow: 0 0 22px rgba(0, 210, 255, 0.14);
+}
+
+.confidence-gauge strong {
+  color: white;
+  font-size: 14px;
+  letter-spacing: 0;
 }
 
 .dashboard-column {
@@ -1340,6 +1418,7 @@ body.light-mode .auth-card,
 body.light-mode .sidebar,
 body.light-mode .history-panel,
 body.light-mode .settings-panel,
+body.light-mode .realtime-metrics-panel,
 body.light-mode .impact-panel,
 body.light-mode .efficiency-panel,
 body.light-mode .guide-panel,
@@ -1354,6 +1433,7 @@ body.light-mode .settings-panel h2,
 body.light-mode .history-item p,
 body.light-mode .setting-row p,
 body.light-mode .setting-tools p,
+body.light-mode .metric-card strong,
 body.light-mode .guide-feature strong,
 body.light-mode .guide-item strong,
 body.light-mode .carbon-meter strong {
@@ -1397,6 +1477,7 @@ body.light-mode .back-login-button:hover {
 }
 
 body.light-mode .status-card,
+body.light-mode .metric-card,
 body.light-mode .category-row,
 body.light-mode .carbon-grid div,
 body.light-mode .guide-item,
@@ -1416,6 +1497,7 @@ body.light-mode .energy-note {
 
 body.light-mode .category-row span,
 body.light-mode .carbon-grid span,
+body.light-mode .metric-card span,
 body.light-mode .guide-feature small,
 body.light-mode .guide-item small,
 body.light-mode .energy-note p,
@@ -1429,6 +1511,16 @@ body.light-mode .history-item small {
 body.light-mode .category-row i,
 body.light-mode .carbon-meter div {
   background: rgba(15, 23, 42, 0.12);
+}
+
+body.light-mode .confidence-gauge {
+  background:
+    radial-gradient(circle at center, #ffffff 0 55%, transparent 56%),
+    conic-gradient(var(--cyan) var(--confidence), rgba(15, 23, 42, 0.14) 0);
+}
+
+body.light-mode .confidence-gauge strong {
+  color: var(--slate);
 }
 
 body.light-mode .history-header button,
@@ -1564,6 +1656,10 @@ body.light-mode .inline-result-guide small {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .scanner-stack {
+    gap: 16px;
+  }
+
   .efficiency-panel,
   .carbon-panel {
     order: 0;
@@ -1588,6 +1684,7 @@ body.light-mode .inline-result-guide small {
 @media (min-width: 641px) and (max-width: 1000px) {
   .scanner-card {
     min-height: 640px;
+    height: auto;
   }
 
   .scanner-blackout {
@@ -1768,6 +1865,37 @@ body.light-mode .inline-result-guide small {
   .scanner-card.result-mode {
     min-height: 560px;
     padding: 18px;
+  }
+
+  .realtime-metrics-panel {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 24px;
+  }
+
+  .metric-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 14px;
+    align-items: center;
+    padding: 14px;
+  }
+
+  .metric-card p,
+  .metric-card span {
+    grid-column: 1;
+  }
+
+  .metric-card strong,
+  .confidence-gauge {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .confidence-gauge {
+    width: 64px;
+    height: 64px;
   }
 
   .scan-target {

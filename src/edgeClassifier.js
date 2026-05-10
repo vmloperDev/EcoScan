@@ -59,7 +59,7 @@ const categories = {
 const labelAliases = {
   aluminium: "metal",
   aluminum: "metal",
-  cardboard: "plastic",
+  cardboard: "paper",
   battery: "hazardous",
   batteries: "hazardous",
   food: "biodegradable",
