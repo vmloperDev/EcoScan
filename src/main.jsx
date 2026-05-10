@@ -793,6 +793,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
         </div>
         <RealTimeMetrics stats={stats} scanResult={scanResult} hasIdentification={hasIdentification} />
         <CarbonTracking stats={stats} />
+        <EfficiencyAnalytics stats={stats} />
       </div>
       <div className="dashboard-column">
         <section className="impact-panel glass-panel">
@@ -804,21 +805,6 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             <div><p>RECYCLE RATE</p><strong>{stats.recycleRate}%</strong></div>
             <div><p>TOP CATEGORY</p><strong>{stats.topCategory}</strong></div>
           </div>
-        </section>
-        <section className="efficiency-panel glass-panel">
-          <p>Efficiency Analytics</p>
-          <div className="category-chart">
-            {stats.chartData.map((item) => (
-              <div className="category-row" key={item.key}>
-                <div>
-                  <span>{item.label}</span>
-                  <strong>{item.count}</strong>
-                </div>
-                <i><b style={{ width: `${Math.max(4, item.percent)}%` }} /></i>
-              </div>
-            ))}
-          </div>
-          <div className="energy-note"><p>Local Edge AI avoided about <strong>{stats.energy}</strong> of cloud processing energy.</p></div>
         </section>
         <section className="guide-panel glass-panel">
           <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
@@ -849,6 +835,26 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
           )}
         </section>
       </div>
+    </section>
+  );
+}
+
+function EfficiencyAnalytics({ stats }) {
+  return (
+    <section className="efficiency-panel glass-panel">
+      <p>Efficiency Analytics</p>
+      <div className="category-chart">
+        {stats.chartData.map((item) => (
+          <div className="category-row" key={item.key}>
+            <div>
+              <span>{item.label}</span>
+              <strong>{item.count}</strong>
+            </div>
+            <i><b style={{ width: `${Math.max(4, item.percent)}%` }} /></i>
+          </div>
+        ))}
+      </div>
+      <div className="energy-note"><p>Local Edge AI avoided about <strong>{stats.energy}</strong> of cloud processing energy.</p></div>
     </section>
   );
 }
