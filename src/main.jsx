@@ -55,6 +55,12 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).has("demo")) {
+      setUser(demoUser("demo@ecoscan.local", "Floyd Allen B. Bueno"));
+      setAuthLoading(false);
+      return undefined;
+    }
+
     if (!hasFirebaseConfig) {
       setAuthLoading(false);
       return undefined;

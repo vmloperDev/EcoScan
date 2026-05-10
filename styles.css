@@ -1004,6 +1004,7 @@ button {
 
 .empty-history {
   padding: 32px;
+  border-radius: 20px;
   text-align: center;
 }
 
@@ -1131,9 +1132,17 @@ body.light-mode .scanner-blackout {
     padding: 16px;
   }
 
+  .prime-app {
+    min-height: auto;
+  }
+
   .prime-app,
   .dashboard-view {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: auto;
   }
 
   .scanner-card,
@@ -1145,39 +1154,358 @@ body.light-mode .scanner-blackout {
 }
 
 @media (max-width: 640px) {
+  body {
+    padding: 10px;
+  }
+
+  .auth-portal {
+    align-items: flex-start;
+    min-height: calc(100vh - 20px);
+    padding-top: 18px;
+    overflow: visible;
+  }
+
+  .auth-glow {
+    width: 320px;
+    height: 320px;
+    filter: blur(90px);
+  }
+
+  .auth-brand {
+    margin-bottom: 22px;
+  }
+
+  .auth-logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    border-radius: 22px;
+  }
+
+  .auth-brand h1 {
+    font-size: 34px;
+  }
+
+  .auth-card {
+    padding: 24px;
+    border-radius: 30px;
+  }
+
+  .auth-card h2 {
+    margin-bottom: 22px;
+    font-size: 22px;
+  }
+
+  .auth-form,
+  .auth-form.compact {
+    gap: 14px;
+  }
+
+  .divider {
+    margin: 24px 0;
+  }
+
+  .auth-toggle {
+    margin-top: 24px;
+  }
+
+  .prime-app {
+    gap: 12px;
+    width: 100%;
+  }
+
   .sidebar,
   .history-panel,
   .settings-panel,
   .impact-panel,
   .efficiency-panel {
-    padding: 24px;
-    border-radius: 32px;
+    padding: 18px;
+    border-radius: 26px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px 14px;
+    align-items: center;
+    padding-bottom: 14px;
+    backdrop-filter: blur(18px);
+  }
+
+  .logo-block {
+    grid-row: span 2;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    border-radius: 14px;
+  }
+
+  .sidebar h1 {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: 22px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profile-meta {
+    margin: 0;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-list {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .nav-btn {
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px 6px;
+    border-radius: 14px;
+    font-size: 11px;
+  }
+
+  .nav-btn span {
+    width: 6px;
+    height: 6px;
+  }
+
+  .status-card {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+
+  .status-card p,
+  .status-card small {
+    display: none;
+  }
+
+  .status-line span {
+    font-size: 10px;
+  }
+
+  .dashboard-view {
+    gap: 12px;
+  }
+
+  .scanner-card {
+    min-height: 580px;
+    border-radius: 28px;
+  }
+
+  .scanner-card.result-mode {
+    min-height: 520px;
+    padding: 18px;
+  }
+
+  .scan-target {
+    width: min(54vw, 190px);
+    height: min(54vw, 190px);
+    border-radius: 22px;
+  }
+
+  .scanner-blackout {
+    align-items: start;
+    padding-top: 74px;
+  }
+
+  .live-badge {
+    top: 18px;
+    right: 18px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+
+  .identified-card {
+    right: 18px;
+    bottom: 220px;
+    left: 18px;
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .identified-card.result-only {
+    width: 100%;
+    padding: 26px 20px;
+  }
+
+  .identified-card p {
+    letter-spacing: 0.22em;
+  }
+
+  .identified-card h2 {
+    margin-bottom: 18px;
+    font-size: clamp(2rem, 12vw, 3.2rem);
+  }
+
+  .ai-meta {
+    gap: 8px;
+  }
+
+  .ai-meta span {
+    padding: 9px;
+    font-size: 10px;
+  }
+
+  .ai-instruction,
+  .scanner-message {
+    font-size: 11px !important;
   }
 
   .confirm-row,
-  .scanner-actions,
   .ai-meta,
   .impact-grid {
     grid-template-columns: 1fr;
   }
 
-  .identified-card {
-    right: 20px;
-    bottom: 240px;
-    left: 20px;
-    padding: 24px;
+  .confirm-row button {
+    min-height: 50px;
   }
 
   .scanner-control-card {
-    right: 20px;
-    bottom: 20px;
-    left: 20px;
-    padding: 22px;
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .scanner-control-card h3 {
+    font-size: 1.7rem;
+  }
+
+  .scanner-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .scanner-actions button {
+    min-height: 42px;
+  }
+
+  .dashboard-column {
+    gap: 12px;
+  }
+
+  .impact-total {
+    margin-bottom: 18px;
+  }
+
+  .impact-total span {
+    font-size: clamp(3rem, 18vw, 4.4rem);
+  }
+
+  .impact-total strong {
+    font-size: 18px;
+  }
+
+  .mini-bars {
+    height: 96px;
+    margin-bottom: 22px;
+  }
+
+  .energy-note {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .history-panel,
+  .settings-panel {
+    min-height: 560px;
+  }
+
+  .history-header {
+    margin-bottom: 24px;
+  }
+
+  .history-panel h2,
+  .settings-panel h2 {
+    font-size: 30px;
+  }
+
+  .settings-panel h2 {
+    margin-bottom: 24px;
+  }
+
+  .history-header button {
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+
+  .history-item {
+    gap: 16px;
+    padding: 18px;
+    border-radius: 20px;
   }
 
   .history-item,
   .setting-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .history-left {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .history-code {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    font-size: 13px;
+  }
+
+  .history-item small {
+    display: block;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .history-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .settings-stack {
+    gap: 24px;
+  }
+
+  .field-group button,
+  .logout-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .nav-btn {
+    font-size: 10px;
+  }
+
+  .scanner-card {
+    min-height: 560px;
+  }
+
+  .scanner-card.result-mode {
+    min-height: 500px;
+  }
+
+  .impact-total {
+    display: block;
   }
 }
