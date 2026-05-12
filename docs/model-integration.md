@@ -1,6 +1,6 @@
 # Real AI Model Integration Guide
 
-The current prototype uses a local demo classifier in `app.js`. This is enough to show the project workflow, but a defense-ready version should use a trained image model.
+EcoScan now uses a real browser-side TensorFlow.js model exported from Teachable Machine. The model is loaded by `src/edgeClassifier.js` from the files inside `public/model`, so image classification runs locally on the user's device.
 
 ## Recommended Path for Student Prototype
 
@@ -9,15 +9,22 @@ The current prototype uses a local demo classifier in `app.js`. This is enough t
 
 ```text
 dataset/
-  recyclable/
-  biodegradable/
-  residual/
-  hazardous/
+  Paper/
+  Plastic/
+  Organic/
+  Battery/
+  Glass/
+  Metal/
+  BackGround/
 ```
 
 3. Train a model using Teachable Machine or transfer learning.
-4. Export the model as TensorFlow.js for browser use or TensorFlow Lite for mobile use.
-5. Replace the `classifyCanvas()` logic in `app.js` with the model prediction call.
+4. Export the model as TensorFlow.js.
+5. Replace the three files inside `public/model`:
+   - `model.json`
+   - `metadata.json`
+   - `weights.bin`
+6. Rebuild and redeploy the app.
 
 ## TensorFlow.js Browser Flow
 
@@ -30,16 +37,19 @@ dataset/
 Example implementation shape:
 
 ```js
-const model = await tf.loadLayersModel("model/model.json");
+const model = await tf.loadLayersModel("/model/model.json");
 const tensor = tf.browser.fromPixels(canvas).resizeNearestNeighbor([224, 224]).expandDims();
 const prediction = await model.predict(tensor).data();
 ```
+
+EcoScan already implements this flow in `src/edgeClassifier.js`, including label mapping, confidence scoring, and background/no-object handling.
 
 ## Dataset Tips
 
 - Use clear images from different angles.
 - Include different lighting conditions.
 - Include campus-specific waste items such as cafeteria cups, bottles, wrappers, and food waste.
+- Include many `BackGround` images from the actual presentation environment so the model learns when no waste item is present.
 - Keep the number of images balanced across categories.
 - Test the model with images that were not used for training.
 
@@ -66,4 +76,3 @@ For the expanded version, sync only scan metadata instead of raw images:
 - User or device ID, if accounts are implemented
 
 This keeps bandwidth low and protects user privacy.
-

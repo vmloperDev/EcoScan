@@ -1,4 +1,4 @@
-const CACHE_NAME = "ecoscan-progressive-v3";
+const CACHE_NAME = "ecoscan-progressive-v4";
 const APP_SHELL = [
   "/",
   "/index.html",

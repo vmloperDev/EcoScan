@@ -10,6 +10,7 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile
 } from "firebase/auth";
@@ -33,7 +34,9 @@ googleProvider.setCustomParameters({
 });
 
 if (auth) {
-  setPersistence(auth, browserLocalPersistence);
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.warn("Firebase auth persistence could not be set.", error);
+  });
 }
 
 export {
@@ -46,6 +49,7 @@ export {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile
 };

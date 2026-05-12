@@ -10,6 +10,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile
 } from "./firebase";
@@ -535,7 +536,7 @@ function AuthPortal({ authView, setAuthView, setUser, hasFirebaseConfig }) {
     setMessage("");
     try {
       if (hasFirebaseConfig) {
-        await signInWithEmailAndPassword(auth, form.email, form.password);
+        await signInWithEmailAndPassword(auth, form.email.trim().toLowerCase(), form.password);
       } else {
         setUser(demoUser(form.email || "floyd@college.edu", "Floyd Allen B. Bueno"));
       }
@@ -551,7 +552,7 @@ function AuthPortal({ authView, setAuthView, setUser, hasFirebaseConfig }) {
     setMessage("");
     try {
       if (hasFirebaseConfig) {
-        const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+        const credential = await createUserWithEmailAndPassword(auth, form.email.trim().toLowerCase(), form.password);
         await updateProfile(credential.user, { displayName: form.name || "EcoScan User" });
       } else {
         setUser(demoUser(form.email || "floyd@college.edu", form.name || "Floyd Allen B. Bueno"));
@@ -599,6 +600,15 @@ function AuthPortal({ authView, setAuthView, setUser, hasFirebaseConfig }) {
         setUser(demoUser("google.user@college.edu", "Floyd Allen B. Bueno"));
       }
     } catch (error) {
+      if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(error.code)) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          setMessage(authError(redirectError));
+          return;
+        }
+      }
       setMessage(authError(error));
     } finally {
       setLoading(false);
@@ -1345,8 +1355,10 @@ function authError(error) {
     "auth/invalid-email": "Enter a valid email address.",
     "auth/invalid-credential": "Email or password is incorrect.",
     "auth/missing-email": "Enter your registered email address first.",
+    "auth/missing-password": "Enter your password first.",
+    "auth/network-request-failed": "Network error. Check your internet connection and try again.",
     "auth/operation-not-allowed": "This sign-in method is not enabled in Firebase Authentication.",
-    "auth/popup-blocked": "The browser blocked the Google popup. Allow popups for this site and try again.",
+    "auth/popup-blocked": "The browser blocked the Google popup. Trying full-page Google sign-in instead.",
     "auth/popup-closed-by-user": "Google login was closed before it finished.",
     "auth/unauthorized-continue-uri": "This deployed domain is not authorized in Firebase Authentication settings.",
     "auth/unauthorized-domain": "This deployed domain is not authorized in Firebase Authentication settings.",
