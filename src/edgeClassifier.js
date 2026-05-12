@@ -2,6 +2,9 @@ import * as tf from "@tensorflow/tfjs";
 
 const MODEL_URL = "/model/model.json";
 const METADATA_URL = "/model/metadata.json";
+const MIN_WASTE_CONFIDENCE_WITH_BACKGROUND = 65;
+const MIN_BACKGROUND_CONFIDENCE = 12;
+const BACKGROUND_MARGIN_TOLERANCE = 25;
 
 let modelBundlePromise;
 
@@ -95,18 +98,43 @@ export async function classifyWasteFromCanvas(canvas, sourceName = "") {
   try {
     const { imageSize, labels, model } = await loadModelBundle();
     const predictions = await runPrediction(model, labels, imageSize, canvas);
-    const bestPrediction = [...predictions].sort((a, b) => b.probability - a.probability)[0];
+    const sortedPredictions = [...predictions].sort((a, b) => b.probability - a.probability);
+    const bestPrediction = sortedPredictions[0];
+    const noObjectPrediction = sortedPredictions.find((prediction) => normalizeLabel(prediction.className) === "no_object");
+    const hasNoObjectClass = Boolean(noObjectPrediction);
+    const noObjectConfidence = Math.round((noObjectPrediction?.probability || 0) * 100);
 
     if (bestPrediction?.className) {
       const key = normalizeLabel(bestPrediction.className);
       const confidence = Math.round(bestPrediction.probability * 100);
 
-      if (key === "no_object" && confidence >= 25) {
+      if (key === "no_object" && confidence >= MIN_BACKGROUND_CONFIDENCE) {
         return buildNoObjectResult(confidence, sourceName, "Teachable Machine", predictions);
       }
 
+      if (
+        hasNoObjectClass &&
+        noObjectConfidence >= MIN_BACKGROUND_CONFIDENCE &&
+        confidence - noObjectConfidence <= BACKGROUND_MARGIN_TOLERANCE
+      ) {
+        return buildNoObjectResult(noObjectConfidence, sourceName, "Teachable Machine", predictions);
+      }
+
       if (categories[key] && confidence >= 30) {
+        if (!hintedKey && hasNoObjectClass && confidence < MIN_WASTE_CONFIDENCE_WITH_BACKGROUND) {
+          return buildNoObjectResult(
+            Math.max(noObjectConfidence, 100 - confidence),
+            sourceName,
+            "Teachable Machine",
+            predictions
+          );
+        }
+
         return buildResult(key, confidence, sourceName, "Teachable Machine", predictions);
+      }
+
+      if (hasNoObjectClass) {
+        return buildNoObjectResult(Math.max(noObjectConfidence, 35), sourceName, "Teachable Machine", predictions);
       }
     }
   } catch (error) {

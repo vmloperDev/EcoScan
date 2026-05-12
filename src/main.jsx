@@ -151,6 +151,14 @@ function pickGuideTip(key, seed = "") {
   return guide.tips[hash % guide.tips.length];
 }
 
+function predictionSummary(result) {
+  if (!Array.isArray(result?.predictions) || !result.predictions.length) {
+    return "";
+  }
+
+  return ` Top guesses: ${result.predictions.map((prediction) => `${prediction.label} ${prediction.confidence}%`).join(", ")}.`;
+}
+
 function categoryFromEntry(entry = {}) {
   const text = `${entry.categoryKey || ""} ${entry.item || ""} ${entry.label || ""}`.toLowerCase();
   if (text.includes("paper") || text.includes("cardboard")) return "paper";
@@ -180,6 +188,7 @@ function App() {
     instruction: "Turn on the camera or upload an image to classify waste locally."
   });
   const [pwaStatus, setPwaStatus] = useState("Offline shell loading");
+  const [modelStatus, setModelStatus] = useState("Checking AI model");
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalledApp, setIsInstalledApp] = useState(window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone === true);
   const [networkStatus, setNetworkStatus] = useState(navigator.onLine ? "Edge AI Online" : "Offline Mode Active");
@@ -279,8 +288,44 @@ function App() {
 
     navigator.serviceWorker
       .register("/sw.js")
-      .then(() => setPwaStatus("Offline shell ready"))
+      .then((registration) => {
+        setPwaStatus("Offline shell ready");
+        registration.update?.();
+      })
       .catch(() => setPwaStatus("Offline shell pending"));
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+
+    const updateModelStatus = async () => {
+      try {
+        const response = await fetch(`/model/metadata.json?v=${Date.now()}`, { cache: "no-store" });
+        const metadata = await response.json();
+        if (!alive) return;
+        const labels = Array.isArray(metadata.labels) ? metadata.labels : [];
+        setModelStatus(labels.includes("BackGround") || labels.includes("Background")
+          ? `AI model ready - ${labels.length} classes with Background`
+          : `AI model warning - ${labels.length} classes, Background missing`);
+      } catch {
+        if (alive) setModelStatus("AI model loaded from offline cache");
+      }
+    };
+
+    updateModelStatus();
+
+    const handleSwMessage = (event) => {
+      if (event.data?.type === "ECOSCAN_SW_UPDATED") {
+        setPwaStatus("Offline shell updated. Reopen EcoScan if the scanner still uses the old model.");
+        updateModelStatus();
+      }
+    };
+
+    navigator.serviceWorker?.addEventListener?.("message", handleSwMessage);
+    return () => {
+      alive = false;
+      navigator.serviceWorker?.removeEventListener?.("message", handleSwMessage);
+    };
   }, []);
 
   useEffect(() => {
@@ -426,6 +471,7 @@ function App() {
       setActiveView={setActiveView}
       networkStatus={networkStatus}
       pwaStatus={pwaStatus}
+      modelStatus={modelStatus}
       installApp={installApp}
       canInstallApp={Boolean(installPrompt) && !isInstalledApp}
       isInstalledApp={isInstalledApp}
@@ -721,6 +767,7 @@ function PrimeApp(props) {
           <p>System Status</p>
           <div className="status-line"><i /><span>{props.networkStatus}</span></div>
           <small>{props.pwaStatus}</small>
+          <small>{props.modelStatus}</small>
         </div>
       </aside>
 
@@ -836,7 +883,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
       drawFocusedFrame(video, canvas);
       const result = await classifyWasteFromCanvas(canvas, "focused camera capture");
       if (result.isNoObject) {
-        setScannerMessage(`No waste item detected (${result.confidence}% background). Keep the camera on and center one item inside the focus box.`);
+        setScannerMessage(`No waste item detected (${result.confidence}% background). Keep the camera on and center one item inside the focus box.${predictionSummary(result)}`);
         setImagePreviewActive(false);
         return;
       }
@@ -872,7 +919,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
 
         const result = await classifyWasteFromCanvas(canvas, file.name);
         if (result.isNoObject) {
-          setScannerMessage(`No waste item detected (${result.confidence}% background). Upload a clearer item photo or turn on the camera.`);
+          setScannerMessage(`No waste item detected (${result.confidence}% background). Upload a clearer item photo or turn on the camera.${predictionSummary(result)}`);
           setImagePreviewActive(true);
           return;
         }
@@ -1102,7 +1149,7 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
   );
 }
 
-function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory, profileAvatar, updateProfileAvatar, installApp, canInstallApp, isInstalledApp, pwaStatus }) {
+function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems, clearHistory, profileAvatar, updateProfileAvatar, installApp, canInstallApp, isInstalledApp, pwaStatus, modelStatus }) {
   const [name, setName] = useState(user.displayName || "Floyd Allen B. Bueno");
   const [settingsMessage, setSettingsMessage] = useState("");
   const avatarInputRef = useRef(null);
@@ -1237,6 +1284,15 @@ function SettingsView({ user, isDark, setIsDark, setUser, onLogout, historyItems
           </div>
           <button onClick={installApp} className="install-app-button" type="button" disabled={isInstalledApp}>
             {isInstalledApp ? "Installed" : canInstallApp ? "Install" : "How To Install"}
+          </button>
+        </div>
+        <div className="setting-row glass-panel">
+          <div>
+            <p>AI Model</p>
+            <span>{modelStatus}</span>
+          </div>
+          <button onClick={() => window.location.reload()} className="install-app-button" type="button">
+            Refresh
           </button>
         </div>
         <div className="setting-tools glass-panel">

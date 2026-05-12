@@ -1,4 +1,4 @@
-const CACHE_NAME = "ecoscan-progressive-v4";
+const CACHE_NAME = "ecoscan-progressive-v5";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -25,6 +25,9 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+  self.clients.matchAll({ type: "window" }).then((clients) => {
+    clients.forEach((client) => client.postMessage({ type: "ECOSCAN_SW_UPDATED", cacheName: CACHE_NAME }));
+  });
 });
 
 self.addEventListener("fetch", (event) => {
@@ -46,6 +49,21 @@ self.addEventListener("fetch", (event) => {
     url.pathname.includes("node_modules/.vite");
 
   if (isDevAsset) {
+    return;
+  }
+
+  if (url.pathname.startsWith("/model/")) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
     return;
   }
 
