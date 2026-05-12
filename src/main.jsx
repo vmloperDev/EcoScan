@@ -452,25 +452,47 @@ function LandingPage({ onEnter }) {
 
   return (
     <section className="landing-page">
-      <div className="landing-glow" />
+      <div className="landing-grid-bg" />
       <div className="landing-shell">
         <div className="landing-copy">
           <div className="landing-logo neon-glow" aria-hidden="true"><QrIcon /></div>
-          <p className="landing-kicker">SDG 12 • EDGE AI WASTE CLASSIFICATION</p>
+          <p className="landing-kicker">SDG 12 / EDGE AI WASTE CLASSIFICATION</p>
           <h1>EcoScan</h1>
           <p className="landing-summary">
             Real-time waste classification that runs locally on the user's device, supports low-connectivity areas, and turns verified scans into sustainability insights.
           </p>
+          <div className="landing-feature-strip" aria-label="EcoScan highlights">
+            <span>Offline-first PWA</span>
+            <span>TensorFlow.js Edge AI</span>
+            <span>Verified Eco-Insights</span>
+          </div>
           <div className="landing-actions">
             <button onClick={onEnter} type="button">ENTER SYSTEM</button>
-            <span>Offline-first PWA • Firebase Auth • TensorFlow.js</span>
+            <span>Camera scan, upload fallback, dashboard analytics</span>
           </div>
         </div>
 
-        <div className="landing-qr-card glass-panel">
-          <img src={qrUrl} alt="QR code to access EcoScan" />
-          <p>Scan to access EcoScan</p>
-          <strong>{appUrl.replace(/^https?:\/\//, "")}</strong>
+        <div className="landing-showcase">
+          <div className="landing-scanner glass-panel" aria-hidden="true">
+            <div className="landing-scanner-top">
+              <span>EDGE AI LIVE</span>
+              <i />
+            </div>
+            <div className="landing-viewfinder">
+              <div className="landing-scan-line" />
+              <span>FOCUS ITEM</span>
+            </div>
+            <div className="landing-result-chip">
+              <strong>Paper/Cardboard</strong>
+              <span>93% confidence</span>
+            </div>
+          </div>
+
+          <div className="landing-qr-card glass-panel">
+            <img src={qrUrl} alt="QR code to access EcoScan" />
+            <p>Scan to access EcoScan</p>
+            <strong>{appUrl.replace(/^https?:\/\//, "")}</strong>
+          </div>
         </div>
       </div>
     </section>
