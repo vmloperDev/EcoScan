@@ -336,7 +336,7 @@ function App() {
   }, [historyItems]);
 
   const confirmScan = () => {
-    if (!scanResult.confidence) {
+    if (!scanResult.confidence || scanResult.isNoObject || scanResult.categoryKey === "no_object") {
       return;
     }
 
@@ -825,6 +825,11 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
       setScannerMessage("Running Edge AI on this device...");
       drawFocusedFrame(video, canvas);
       const result = await classifyWasteFromCanvas(canvas, "focused camera capture");
+      if (result.isNoObject) {
+        setScannerMessage(`No waste item detected (${result.confidence}% background). Keep the camera on and center one item inside the focus box.`);
+        setImagePreviewActive(false);
+        return;
+      }
       setScanResult(result);
       setImagePreviewActive(false);
       stopCamera(streamRef);
@@ -856,6 +861,11 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
         URL.revokeObjectURL(image.src);
 
         const result = await classifyWasteFromCanvas(canvas, file.name);
+        if (result.isNoObject) {
+          setScannerMessage(`No waste item detected (${result.confidence}% background). Upload a clearer item photo or turn on the camera.`);
+          setImagePreviewActive(true);
+          return;
+        }
         setScanResult(result);
         setImagePreviewActive(true);
         setCameraActive(false);

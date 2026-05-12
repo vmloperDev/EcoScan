@@ -59,6 +59,15 @@ const categories = {
 const labelAliases = {
   aluminium: "metal",
   aluminum: "metal",
+  background: "no_object",
+  bg: "no_object",
+  empty: "no_object",
+  none: "no_object",
+  nothing: "no_object",
+  "no object": "no_object",
+  no_object: "no_object",
+  "no waste": "no_object",
+  nowaste: "no_object",
   cardboard: "paper",
   battery: "hazardous",
   batteries: "hazardous",
@@ -91,6 +100,10 @@ export async function classifyWasteFromCanvas(canvas, sourceName = "") {
     if (bestPrediction?.className) {
       const key = normalizeLabel(bestPrediction.className);
       const confidence = Math.round(bestPrediction.probability * 100);
+
+      if (key === "no_object" && confidence >= 25) {
+        return buildNoObjectResult(confidence, sourceName, "Teachable Machine", predictions);
+      }
 
       if (categories[key] && confidence >= 30) {
         return buildResult(key, confidence, sourceName, "Teachable Machine", predictions);
@@ -152,7 +165,7 @@ function buildResult(key, confidence, sourceName, engine, predictions = []) {
     .map((prediction) => {
       const predictionKey = normalizeLabel(prediction.className);
       return {
-        label: categories[predictionKey]?.item || prediction.className,
+        label: predictionKey === "no_object" ? "Background" : categories[predictionKey]?.item || prediction.className,
         confidence: Math.round(prediction.probability * 100)
       };
     })
@@ -167,6 +180,34 @@ function buildResult(key, confidence, sourceName, engine, predictions = []) {
     predictions: topPredictions,
     source: sourceName || "Camera capture",
     createdAt: new Date().toISOString()
+  };
+}
+
+function buildNoObjectResult(confidence, sourceName, engine, predictions = []) {
+  const topPredictions = predictions
+    .map((prediction) => {
+      const predictionKey = normalizeLabel(prediction.className);
+      return {
+        label: predictionKey === "no_object" ? "Background" : categories[predictionKey]?.item || prediction.className,
+        confidence: Math.round(prediction.probability * 100)
+      };
+    })
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, 3);
+
+  return {
+    code: "--",
+    item: "No waste item detected",
+    label: "Background",
+    impact: 0,
+    confidence,
+    categoryKey: "no_object",
+    engine,
+    predictions: topPredictions,
+    source: sourceName || "Camera capture",
+    createdAt: new Date().toISOString(),
+    isNoObject: true,
+    instruction: "Place a waste item inside the focus box, then scan again."
   };
 }
 
