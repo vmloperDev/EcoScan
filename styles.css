@@ -1,11 +1,12 @@
 :root {
-  --cyan: #00d2ff;
-  --blue: #3a7bd5;
+  --cyan: #22c55e;
+  --blue: #14b8a6;
   --dark: #050505;
   --light: #f1f5f9;
   --slate: #1e293b;
   --muted: #6b7280;
-  --green: #22c55e;
+  --green: #16a34a;
+  --aqua: #00d2ff;
   --red: #ef4444;
 }
 
@@ -22,12 +23,18 @@ body {
 }
 
 body.dark-mode {
-  background: var(--dark);
+  background:
+    radial-gradient(circle at 12% 10%, rgba(34, 197, 94, 0.14), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(20, 184, 166, 0.12), transparent 28%),
+    var(--dark);
   color: white;
 }
 
 body.light-mode {
-  background: var(--light);
+  background:
+    radial-gradient(circle at 10% 8%, rgba(34, 197, 94, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 16%, rgba(20, 184, 166, 0.14), transparent 30%),
+    var(--light);
   color: var(--slate);
 }
 
@@ -667,7 +674,7 @@ button {
 }
 
 .neon-glow {
-  box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.32);
 }
 
 .sidebar {
@@ -837,7 +844,8 @@ button {
   overflow: hidden;
   border-radius: 48px;
   background:
-    radial-gradient(circle at 50% 16%, rgba(0, 210, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 50% 16%, rgba(34, 197, 94, 0.14), transparent 34%),
+    radial-gradient(circle at 82% 76%, rgba(20, 184, 166, 0.08), transparent 28%),
     #050505;
 }
 
@@ -849,7 +857,7 @@ button {
   min-height: 410px;
   padding: 32px;
   background:
-    radial-gradient(circle at 50% 18%, rgba(0, 210, 255, 0.16), transparent 36%),
+    radial-gradient(circle at 50% 18%, rgba(34, 197, 94, 0.17), transparent 36%),
     radial-gradient(circle at 50% 82%, rgba(34, 197, 94, 0.1), transparent 34%),
     rgba(255, 255, 255, 0.03);
 }
@@ -864,7 +872,7 @@ button {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgba(0, 210, 255, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.18);
   border-radius: 34px;
   background: #000;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 24px 70px rgba(0, 0, 0, 0.36);
@@ -919,10 +927,10 @@ button {
   width: 256px;
   height: 256px;
   overflow: hidden;
-  border: 2px solid rgba(0, 210, 255, 0.46);
+  border: 2px solid rgba(34, 197, 94, 0.5);
   border-radius: 24px;
-  background: rgba(0, 210, 255, 0.035);
-  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.32), 0 0 40px rgba(0, 210, 255, 0.18);
+  background: rgba(34, 197, 94, 0.045);
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.32), 0 0 42px rgba(34, 197, 94, 0.2);
   z-index: 2;
 }
 
@@ -971,7 +979,7 @@ button {
   bottom: 14px;
   left: 16px;
   padding: 8px 10px;
-  border: 1px solid rgba(0, 210, 255, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.24);
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.42);
   color: var(--cyan);
@@ -1353,6 +1361,17 @@ button {
   font-weight: 800;
 }
 
+.category-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.category-row .waste-badge {
+  flex: 0 0 auto;
+}
+
 .category-row strong,
 .carbon-grid strong {
   color: var(--cyan);
@@ -1475,7 +1494,7 @@ button {
 .guide-feature,
 .guide-item {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   padding: 13px 14px;
@@ -1485,21 +1504,46 @@ button {
 }
 
 .guide-feature {
-  border-color: rgba(0, 210, 255, 0.25);
-  background: rgba(0, 210, 255, 0.08);
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.08);
 }
 
-.guide-feature span,
-.guide-item span {
+.waste-badge {
   display: grid;
+  grid-template-columns: 1fr;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(0, 210, 255, 0.12);
-  color: var(--cyan);
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--waste-color) 52%, transparent);
+  border-radius: 12px;
+  background: var(--waste-soft);
+  color: var(--waste-color);
   font-size: 12px;
   font-weight: 950;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--waste-color) 14%, transparent);
+}
+
+.waste-badge.compact {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.waste-badge svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.waste-badge.compact svg {
+  width: 15px;
+  height: 15px;
+}
+
+.waste-badge b {
+  margin-top: -3px;
+  font-size: 9px;
+  line-height: 1;
 }
 
 .guide-feature strong,
@@ -1990,8 +2034,8 @@ body.light-mode .empty-history {
 
 body.light-mode .guide-feature,
 body.light-mode .energy-note {
-  border-color: rgba(0, 160, 210, 0.26);
-  background: rgba(0, 210, 255, 0.08);
+  border-color: rgba(22, 163, 74, 0.26);
+  background: rgba(34, 197, 94, 0.09);
 }
 
 body.light-mode .category-row span,
@@ -2074,7 +2118,7 @@ body.light-mode .scanner-card.result-mode,
 body.light-mode .scanner-blackout {
   color: white;
   background:
-    radial-gradient(circle at 50% 18%, rgba(0, 210, 255, 0.16), transparent 36%),
+    radial-gradient(circle at 50% 18%, rgba(34, 197, 94, 0.17), transparent 36%),
     radial-gradient(circle at 50% 82%, rgba(34, 197, 94, 0.1), transparent 34%),
     #111827;
 }

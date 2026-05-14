@@ -3,6 +3,8 @@ import * as tf from "@tensorflow/tfjs";
 const MODEL_URL = "/model/model.json";
 const METADATA_URL = "/model/metadata.json";
 const MIN_WASTE_CONFIDENCE_WITH_BACKGROUND = 65;
+const MIN_WASTE_CONFIDENCE = 45;
+const MIN_CLEAR_MARGIN = 8;
 const MIN_BACKGROUND_CONFIDENCE = 12;
 const BACKGROUND_MARGIN_TOLERANCE = 25;
 
@@ -100,6 +102,7 @@ export async function classifyWasteFromCanvas(canvas, sourceName = "") {
     const predictions = await runPrediction(model, labels, imageSize, canvas);
     const sortedPredictions = [...predictions].sort((a, b) => b.probability - a.probability);
     const bestPrediction = sortedPredictions[0];
+    const secondPrediction = sortedPredictions[1];
     const noObjectPrediction = sortedPredictions.find((prediction) => normalizeLabel(prediction.className) === "no_object");
     const hasNoObjectClass = Boolean(noObjectPrediction);
     const noObjectConfidence = Math.round((noObjectPrediction?.probability || 0) * 100);
@@ -121,6 +124,19 @@ export async function classifyWasteFromCanvas(canvas, sourceName = "") {
       }
 
       if (categories[key] && confidence >= 30) {
+        const secondConfidence = Math.round((secondPrediction?.probability || 0) * 100);
+        const isClearPrediction = confidence >= MIN_WASTE_CONFIDENCE && confidence - secondConfidence >= MIN_CLEAR_MARGIN;
+
+        if (!hintedKey && !isClearPrediction) {
+          return buildNoObjectResult(
+            Math.max(noObjectConfidence, 100 - confidence),
+            sourceName,
+            "Teachable Machine",
+            predictions,
+            "The model is not confident enough yet. Center one item, improve lighting, and scan again."
+          );
+        }
+
         if (!hintedKey && hasNoObjectClass && confidence < MIN_WASTE_CONFIDENCE_WITH_BACKGROUND) {
           return buildNoObjectResult(
             Math.max(noObjectConfidence, 100 - confidence),
@@ -211,7 +227,7 @@ function buildResult(key, confidence, sourceName, engine, predictions = []) {
   };
 }
 
-function buildNoObjectResult(confidence, sourceName, engine, predictions = []) {
+function buildNoObjectResult(confidence, sourceName, engine, predictions = [], instruction = "Place a waste item inside the focus box, then scan again.") {
   const topPredictions = predictions
     .map((prediction) => {
       const predictionKey = normalizeLabel(prediction.className);
@@ -235,7 +251,7 @@ function buildNoObjectResult(confidence, sourceName, engine, predictions = []) {
     source: sourceName || "Camera capture",
     createdAt: new Date().toISOString(),
     isNoObject: true,
-    instruction: "Place a waste item inside the focus box, then scan again."
+    instruction
   };
 }
 

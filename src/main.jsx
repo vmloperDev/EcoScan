@@ -31,6 +31,16 @@ const categoryDisplay = {
   hazardous: "Battery"
 };
 
+const categoryTheme = {
+  plastic: { code: "PL", label: "Plastic", color: "#2563eb", soft: "rgba(37, 99, 235, 0.14)" },
+  paper: { code: "PC", label: "Paper/Cardboard", color: "#f59e0b", soft: "rgba(245, 158, 11, 0.16)" },
+  biodegradable: { code: "OR", label: "Organic", color: "#22c55e", soft: "rgba(34, 197, 94, 0.16)" },
+  metal: { code: "MT", label: "Metal", color: "#94a3b8", soft: "rgba(148, 163, 184, 0.18)" },
+  glass: { code: "GL", label: "Glass", color: "#14b8a6", soft: "rgba(20, 184, 166, 0.16)" },
+  hazardous: { code: "HZ", label: "Battery", color: "#ef4444", soft: "rgba(239, 68, 68, 0.16)" },
+  no_object: { code: "--", label: "Background", color: "#64748b", soft: "rgba(100, 116, 139, 0.16)" }
+};
+
 const recycleKeys = new Set(["plastic", "paper", "metal", "glass"]);
 
 const disposalGuide = {
@@ -168,6 +178,10 @@ function categoryFromEntry(entry = {}) {
   if (text.includes("battery") || text.includes("hazard")) return "hazardous";
   if (text.includes("metal") || text.includes("aluminium") || text.includes("aluminum") || text.includes("can")) return "metal";
   return "plastic";
+}
+
+function themeForCategory(key = "plastic") {
+  return categoryTheme[key] || categoryTheme[categoryFromEntry({ categoryKey: key })] || categoryTheme.plastic;
 }
 
 function App() {
@@ -755,7 +769,7 @@ function PrimeApp(props) {
       <aside className="sidebar glass-panel">
         <ProfileAvatar avatar={props.profileAvatar} name={displayName} className="sidebar-avatar neon-glow" />
         <h1>Hi, {capitalize(firstName)}.</h1>
-        <p className="profile-meta">Gordon College • BSCS-2C</p>
+        <p className="profile-meta">Gordon College - BSCS-2C</p>
         <nav className="nav-list" aria-label="EcoScan sections">
           {["dashboard", "history", "settings"].map((view) => (
             <button key={view} onClick={() => props.setActiveView(view)} className={`nav-btn ${props.activeView === view ? "active" : ""}`} type="button">
@@ -813,6 +827,28 @@ function ProfileAvatar({ avatar, name, className = "" }) {
   );
 }
 
+function WasteBadge({ categoryKey = "plastic", code, compact = false }) {
+  const theme = themeForCategory(categoryKey);
+  return (
+    <span
+      className={compact ? "waste-badge compact" : "waste-badge"}
+      style={{ "--waste-color": theme.color, "--waste-soft": theme.soft }}
+      title={theme.label}
+    >
+      <TrashBinIcon />
+      <b>{code || theme.code}</b>
+    </span>
+  );
+}
+
+function TrashBinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 4h6l1 2h4v2H4V6h4l1-2Zm-2 6h10l-.7 10H7.7L7 10Zm3 2v6h1.5v-6H10Zm3 0v6h1.5v-6H13Z" />
+    </svg>
+  );
+}
+
 function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, stats }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -863,7 +899,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
       videoRef.current.srcObject = stream;
       setCameraActive(true);
       setImagePreviewActive(false);
-      setScannerMessage("Camera active. Place one item inside the cyan focus box.");
+      setScannerMessage("Camera active. Place one item inside the green focus box.");
     } catch (error) {
       setScannerMessage("Camera permission was blocked. Upload an image instead.");
     }
@@ -981,7 +1017,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
             </div>
             <p className="ai-instruction">{scanResult.instruction}</p>
             <div className="inline-result-guide">
-              <span>{activeGuide.code}</span>
+              <WasteBadge categoryKey={activeGuideKey} code={activeGuide.code} compact />
               <small>{activeGuideTip}</small>
             </div>
             <div className="confirm-row">
@@ -1023,7 +1059,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
           <p>{hasIdentification ? "Recommended Guide" : "Disposal Guide"}</p>
           {hasIdentification && (
             <div className="guide-feature">
-              <span>{activeGuide.code}</span>
+              <WasteBadge categoryKey={activeGuideKey} code={activeGuide.code} />
               <div>
                 <strong>{activeGuide.title}</strong>
                 <small>{activeGuideTip}</small>
@@ -1036,7 +1072,7 @@ function DashboardView({ scanResult, setScanResult, confirmScan, rescanItem, sta
                 const guide = disposalGuide[key];
                 return (
                   <div className="guide-item" key={key}>
-                    <span>{guide.code}</span>
+                    <WasteBadge categoryKey={key} code={guide.code} />
                     <div>
                       <strong>{guide.title}</strong>
                       <small>{pickGuideTip(key, scanResult.createdAt || key)}</small>
@@ -1058,9 +1094,13 @@ function EfficiencyAnalytics({ stats }) {
       <p>Efficiency Analytics</p>
       <div className="category-chart">
         {stats.chartData.map((item) => (
-          <div className="category-row" key={item.key}>
+          <div
+            className="category-row"
+            key={item.key}
+            style={{ "--waste-color": themeForCategory(item.key).color, "--waste-soft": themeForCategory(item.key).soft }}
+          >
             <div>
-              <span>{item.label}</span>
+              <span><WasteBadge categoryKey={item.key} compact /> {item.label}</span>
               <strong>{item.count}</strong>
             </div>
             <i><b style={{ width: `${Math.max(4, item.percent)}%` }} /></i>
@@ -1132,7 +1172,7 @@ function HistoryView({ historyItems, deleteHistoryItem, clearHistory }) {
         {historyItems.map((entry, index) => (
           <div className="history-item glass-panel" key={`${entry.item}-${entry.time}-${index}`}>
             <div className="history-left">
-              <div className="history-code">{entry.code}</div>
+              <WasteBadge categoryKey={entry.categoryKey || categoryFromEntry(entry)} code={entry.code} />
               <div>
                 <p>{entry.item}</p>
                 <small>{entry.time} - {entry.label || "Unlabeled"} - {entry.confidence || 86}%</small>
